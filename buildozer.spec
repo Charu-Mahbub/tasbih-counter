@@ -8,8 +8,8 @@ requirements = python3,kivy,cython==0.29.36
 android.api = 33
 android.minapi = 21
 android.archs = arm64-v8a, armeabi-v7a
-icon = icon.png
-presplash = presplash.png
+#icon = icon.png
+#presplash = presplash.png
 orientation = portrait
 fullscreen = 0
 
