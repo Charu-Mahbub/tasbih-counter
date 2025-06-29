@@ -1,0 +1,66 @@
+name: Build Tasbih Counter APK
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            python3-pip \
+            build-essential \
+            git \
+            python3-dev \
+            ffmpeg \
+            libsdl2-dev \
+            libsdl2-image-dev \
+            libsdl2-mixer-dev \
+            libsdl2-ttf-dev \
+            openjdk-17-jdk \
+            autoconf \
+            automake \
+            cmake \
+            zlib1g-dev \
+            libncurses5-dev \
+            libncursesw5-dev \
+            libtinfo5 \
+            libtool
+          pip install cython==0.29.36 kivy buildozer
+
+      - name: Install Android NDK and SDK
+        run: |
+          wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
+          unzip android-ndk-r25b-linux.zip
+          mv android-ndk-r25b ~/android-ndk
+          echo "ANDROIDNDK=$HOME/android-ndk" >> $GITHUB_ENV
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+          unzip commandlinetools-linux-9477386_latest.zip
+          mkdir -p ~/android-sdk/cmdline-tools/latest
+          mv cmdline-tools/* ~/android-sdk/cmdline-tools/latest
+          echo "ANDROIDSDK=$HOME/android-sdk" >> $GITHUB_ENV
+          yes | ~/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+          ~/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+
+      - name: Build APK
+        run: |
+          buildozer android debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: tasbihcounter-apk
+          path: bin/tasbihcounter-*.apk
